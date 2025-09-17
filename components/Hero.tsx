@@ -72,11 +72,18 @@ const Hero = () => {
                 >
                   View Projects
                 </motion.button>
-                <Link href="/contact">
+                <Link href="#contact">
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className="px-8 py-3 border border-[#EB2420]/30 text-gray-900 dark:text-white font-medium rounded-lg hover:bg-[#EB2420]/10 transition-all cursor-pointer"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      const element = document.getElementById('contact')
+                      if (element) {
+                        element.scrollIntoView({ behavior: 'smooth' })
+                      }
+                    }}
                   >
                     Contact Me
                   </motion.div>

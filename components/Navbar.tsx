@@ -107,9 +107,9 @@ const Navbar = () => {
   const navLinks = [
     { name: "Home", path: "/", section: "hero" },
     { name: "About", path: "/", section: "about" },
-    { name: "Skills", path: "/", section: "skills" },
     { name: "Experience", path: "/", section: "education" },
     { name: "Projects", path: "/", section: "projects" },
+    { name: "Skills", path: "/", section: "skills" },
     { name: "Contact", path: "/", section: "contact" },
   ]
 

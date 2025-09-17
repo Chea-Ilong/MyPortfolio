@@ -111,10 +111,17 @@ const About = () => {
 
               <div className="pt-4">
                 <motion.a
-                  href="/contact"
+                  href="#contact"
                   className="inline-flex items-center text-[#EB2420] font-medium hover:underline"
                   whileHover={{ x: 5 }}
                   whileTap={{ scale: 0.95, color: "#EB2420" }}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    const element = document.getElementById('contact')
+                    if (element) {
+                      element.scrollIntoView({ behavior: 'smooth' })
+                    }
+                  }}
                 >
                   <span>Get in touch</span>
                   <motion.svg

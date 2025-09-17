@@ -1,13 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { Award, Eye } from "lucide-react"
+import { Award } from "lucide-react"
 import { motion } from "framer-motion"
 
-const CertificateCard = ({ title, issuer, date, image, credential }) => {
-  const [isHovered, setIsHovered] = useState(false)
-  const [isIconActive, setIsIconActive] = useState(false)
-  const [isTouchDevice, setIsTouchDevice] = useState(false)
+const CertificateCard = ({ title, issuer, date, images, credential }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   // Animation variants
   const cardVariants = {
@@ -17,7 +15,7 @@ const CertificateCard = ({ title, issuer, date, image, credential }) => {
       y: 0,
       transition: {
         duration: 0.5,
-        ease: "easeOut",
+        ease: "easeOut" as const,
       },
     },
     hover: {
@@ -38,34 +36,6 @@ const CertificateCard = ({ title, issuer, date, image, credential }) => {
     },
   }
 
-  const overlayVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { duration: 0.3 },
-    },
-  }
-
-  const buttonVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        delay: 0.1,
-        duration: 0.3,
-      },
-    },
-    hover: {
-      scale: 1.05,
-      transition: { duration: 0.2 },
-    },
-    tap: {
-      scale: 0.95,
-      transition: { duration: 0.1 },
-    },
-  }
-
   const iconVariants = {
     initial: { rotate: -10, opacity: 0.5 },
     animate: {
@@ -78,102 +48,112 @@ const CertificateCard = ({ title, issuer, date, image, credential }) => {
       color: "#EB2420",
       transition: { duration: 0.2 },
     },
-    tap: {
-      scale: 0.9,
-      transition: { duration: 0.1 },
-    },
   }
 
-  // Handle touch devices
-  const handleTouchStart = () => {
-    setIsTouchDevice(true)
-    setIsHovered(true)
+  // Image navigation functions
+  const nextImage = () => {
+    if (images && images.length > 0) {
+      setCurrentImageIndex((prev) => (prev + 1) % images.length)
+    }
   }
+
+  const prevImage = () => {
+    if (images && images.length > 0) {
+      setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
+    }
+  }
+
+  // Ensure we have valid images array and current index
+  const imageArray = Array.isArray(images) ? images : []
+  const validIndex = imageArray.length > 0 ? Math.min(currentImageIndex, imageArray.length - 1) : 0
+  const currentImage = imageArray.length > 0 ? imageArray[validIndex] : "/placeholder.jpg"
 
   return (
     <motion.div
-      className="relative bg-white dark:bg-[#2a2826] rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-[#EB2420]/20 transition-all"
+      className="relative bg-white dark:bg-[#2a2826] rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-[#EB2420]/20 transition-all min-h-[280px] md:min-h-[300px]"
       initial="hidden"
       whileInView="visible"
-      whileHover={!isTouchDevice ? "hover" : undefined}
+      whileHover="hover"
       viewport={{ once: true, amount: 0.3 }}
       variants={cardVariants}
-      onMouseEnter={() => !isTouchDevice && setIsHovered(true)}
-      onMouseLeave={() => {
-        if (!isTouchDevice) {
-          setIsHovered(false)
-          setIsIconActive(false)
-        }
-      }}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={() => {
-        // On touch devices, we don't want to hide overlay immediately
-        // It will be hidden when user taps elsewhere
-      }}
     >
-      <div className="aspect-video w-full overflow-hidden">
-        <motion.img
-          src={image || "/porfile.jpg"}
-          alt={title}
-          className="w-full h-full object-cover"
-          variants={imageVariants}
-        />
+      <div className="flex flex-col md:flex-row h-full">
+        {/* Left side - Image */}
+        <div className="md:w-1/3 relative group">
+          <div className="relative h-56 md:h-72 overflow-hidden">
+            <motion.img
+              key={validIndex}
+              src={currentImage}
+              alt={title || "Certificate image"}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              variants={imageVariants}
+              initial="initial"
+              whileHover="hover"
+              onError={(e) => {
+                e.currentTarget.src = "/placeholder.jpg"
+              }}
+            />
 
-        {(isHovered || isTouchDevice) && (
-          <motion.div
-            className="absolute inset-0 bg-white/80 dark:bg-[#1F1D1B]/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4 p-4"
-            initial="hidden"
-            animate="visible"
-            variants={overlayVariants}
-          >
-            {credential && (
-              <motion.a
-                href={credential}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`inline-flex items-center gap-2 ${
-                  isIconActive ? "bg-[#EB2420]/80" : "bg-[#EB2420]"
-                } hover:bg-[#EB2420]/90 text-white px-4 py-2 rounded-full transition-colors`}
-                variants={buttonVariants}
-                whileHover="hover"
-                whileTap={{ scale: 0.9, backgroundColor: "#EB2420" }}
-                onMouseEnter={() => setIsIconActive(true)}
-                onMouseLeave={() => setIsIconActive(false)}
-                onClick={(e) => {
-                  if (isTouchDevice) {
-                    e.stopPropagation()
-                    // Keep overlay open on touch devices when clicking the button
-                  }
-                }}
-              >
-                <Eye size={16} color={isIconActive ? "#ffffff" : "#f8f8f8"} />
-                <span>View Certificate</span>
-              </motion.a>
+            {/* Image navigation arrows */}
+            {imageArray.length > 1 && (
+              <>
+                <button
+                  onClick={prevImage}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/70 text-white p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 z-20 backdrop-blur-sm"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/70 text-white p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 z-20 backdrop-blur-sm"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+                
+                {/* Image indicators */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-20 bg-black/30 backdrop-blur-sm rounded-full px-3 py-2">
+                  {imageArray.map((_: any, index: number) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentImageIndex(index)}
+                      className={`w-2.5 h-2.5 rounded-full transition-all duration-200 ${
+                        index === validIndex 
+                          ? 'bg-white shadow-md' 
+                          : 'bg-white/50'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </>
             )}
-          </motion.div>
-        )}
-      </div>
-
-      <div className="p-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="font-bold text-lg truncate text-gray-900 dark:text-white max-w-[200px] sm:max-w-full">
-              {title}
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400 text-sm truncate max-w-[200px] sm:max-w-full">{issuer}</p>
           </div>
-          <motion.div
-            variants={iconVariants}
-            whileHover="hover"
-            whileTap={{ scale: 0.9, color: "#EB2420" }}
-            initial="initial"
-            animate="animate"
-            viewport={{ once: true }}
-          >
-            <Award className={isIconActive ? "text-[#EB2420]" : "text-[#EB2420]"} size={20} />
-          </motion.div>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">{date}</p>
+
+        {/* Right side - Content */}
+        <div className="md:w-2/3 p-6">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex-1">
+              <h3 className="font-bold text-xl text-gray-900 dark:text-white mb-2">{title}</h3>
+              <p className="text-gray-500 dark:text-gray-400 text-base mb-2">{issuer}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-500">{date}</p>
+            </div>
+            <motion.div
+              variants={iconVariants}
+              whileHover="hover"
+              whileTap={{ scale: 0.9, color: "#EB2420" }}
+              initial="initial"
+              animate="animate"
+              viewport={{ once: true }}
+              className="ml-4"
+            >
+              <Award className="text-[#EB2420]" size={24} />
+            </motion.div>
+          </div>
+        </div>
       </div>
     </motion.div>
   )

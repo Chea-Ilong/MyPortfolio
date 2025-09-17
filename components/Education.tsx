@@ -38,14 +38,6 @@ const educationEvents = [
 
 const achievementEvents = [
   {
-    year: 2020,
-    title: "Programming Competition Finalist",
-    description: "Reached finals in university coding competition",
-    details:
-      "Competed against 200+ students and reached the top 10 finalists by solving complex algorithmic challenges.",
-    isCertificate: false,
-  },
-  {
     year: 2021,
     title: "Web Development Certification",
     description: "Completed comprehensive web development course",
@@ -56,15 +48,7 @@ const achievementEvents = [
     credential: "https://coursera.org/verify/WD-2021-78945",
     date: "May 2021",
     skills: ["HTML5", "CSS3", "JavaScript", "Responsive Design"],
-    image: "/porfile.jpg",
-  },
-  {
-    year: 2022,
-    title: "Software Development Competition Winner",
-    description: "First place in university hackathon",
-    details:
-      "Led a team of four to develop an innovative accessibility app that won first place among 30 competing teams.",
-    isCertificate: false,
+    images: ["/porfile.jpg", "/java.jpeg", "/photo_2025-09-17_22-34-55.jpg"],
   },
   {
     year: 2022,
@@ -78,15 +62,7 @@ const achievementEvents = [
     credential: "https://udemy.com/certificate/JS-ADV-34567",
     date: "October 2022",
     skills: ["ES6+", "Async/Await", "Promises", "Functional Programming"],
-    image: "/porfile.jpg",
-  },
-  {
-    year: 2023,
-    title: "Academic Excellence Scholarship",
-    description: "Awarded merit-based scholarship",
-    details:
-      "Received a full scholarship for the academic year based on outstanding performance and contribution to the department.",
-    isCertificate: false,
+    images: ["/java.jpeg", "/porfile.jpg", "/photo_2025-09-17_22-34-55.jpg"],
   },
   {
     year: 2023,
@@ -100,7 +76,7 @@ const achievementEvents = [
     credential: "https://freecodecamp.org/certification/REACT-2023-12345",
     date: "December 2023",
     skills: ["React", "Redux", "Hooks", "Context API", "Next.js"],
-    image: "/porfile.jpg",
+    images: ["/photo_2025-09-17_22-34-55.jpg", "/porfile.jpg", "/java.jpeg"],
   },
 ]
 
@@ -168,7 +144,7 @@ const Education = () => {
         </motion.div>
 
         {/* Experience/Achievements Content */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 gap-6 md:gap-8 max-w-4xl mx-auto">
           {achievementEvents.map((event, index) =>
             event.isCertificate ? (
               <CertificateCard
@@ -176,7 +152,7 @@ const Education = () => {
                 title={event.title}
                 issuer={event.issuer}
                 date={event.date}
-                image={event.image}
+                images={event.images}
                 credential={event.credential}
               />
             ) : (
@@ -199,21 +175,37 @@ function AchievementCard({ event }) {
       whileHover={{ y: -5 }}
       className="bg-white dark:bg-[#2a2826] rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-[#EB2420]/20 hover:border-[#EB2420]/50 transition-all"
     >
-      <div className="p-4 sm:p-6">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#EB2420]/10 text-[#EB2420] mb-2">
-              {event.year}
+      <div className="flex flex-col md:flex-row">
+        {/* Left side - Image */}
+        <div className="md:w-1/3 relative">
+          <div className="aspect-video md:aspect-square w-full overflow-hidden">
+            <motion.img
+              src={event.image || "/porfile.jpg"}
+              alt={event.title}
+              className="w-full h-full object-cover"
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.3 }}
+            />
+            {/* Overlay with award icon */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#EB2420]/20 to-transparent flex items-end justify-end p-4">
+              <div className="bg-white/90 dark:bg-[#2a2826]/90 p-2 rounded-full">
+                <FaAward className="h-6 w-6 text-[#EB2420]" />
+              </div>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white">{event.title}</h3>
-          </div>
-          <div className="bg-[#EB2420]/10 p-2 rounded-full flex-shrink-0">
-            <FaAward className="h-5 w-5 sm:h-6 sm:w-6 text-[#EB2420]" />
           </div>
         </div>
-
-        <p className="text-gray-600 dark:text-gray-300 mb-4">{event.description}</p>
-        <p className="text-sm text-gray-500 dark:text-gray-400">{event.details}</p>
+        
+        {/* Right side - Content */}
+        <div className="md:w-2/3 p-6">
+          <div className="mb-4">
+            <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[#EB2420]/10 text-[#EB2420] mb-3">
+              {event.year}
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{event.title}</h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-4 leading-relaxed">{event.description}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">{event.details}</p>
+          </div>
+        </div>
       </div>
     </motion.div>
   )
