@@ -1,22 +1,29 @@
 "use client"
 
+import { memo } from "react"
 import { motion } from "framer-motion"
 import Image from "next/image"
 import { FaGithub, FaExternalLinkAlt } from "react-icons/fa"
+import { ITEM_VARIANTS } from "@/constants"
+import type { Project } from "@/types"
 
-const ProjectCard = ({ project, onHover, onLeave, isHovered }) => {
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5 },
-    },
-  }
+interface ProjectCardProps {
+  project: Project
+  onHover: () => void
+  onLeave: () => void
+  isHovered: boolean
+}
+
+const ProjectCard = memo(function ProjectCard({
+  project,
+  onHover,
+  onLeave,
+  isHovered,
+}: ProjectCardProps) {
 
   return (
     <motion.div
-      variants={itemVariants}
+      variants={ITEM_VARIANTS}
       className="bg-white dark:bg-[#2a2826] rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"
       onMouseEnter={onHover}
       onMouseLeave={onLeave}
@@ -76,6 +83,8 @@ const ProjectCard = ({ project, onHover, onLeave, isHovered }) => {
       </div>
     </motion.div>
   )
-}
+})
+
+ProjectCard.displayName = "ProjectCard"
 
 export default ProjectCard

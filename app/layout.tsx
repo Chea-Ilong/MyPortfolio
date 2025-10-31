@@ -63,10 +63,17 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <div className="min-h-screen bg-white dark:bg-[#1F1D1B] text-gray-900 dark:text-white transition-colors duration-300">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange={false}
+        >
+          <div className="min-h-screen bg-white dark:bg-[#1F1D1B] text-gray-900 dark:text-white will-change-auto">
             <Navbar />
-            {children}
+            <main className="isolate">
+              {children}
+            </main>
             <Footer />
           </div>
         </ThemeProvider>

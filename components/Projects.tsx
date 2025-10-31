@@ -1,80 +1,22 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { motion } from "framer-motion"
 import ProjectCard from "./ProjectCard"
+import { PROJECTS } from "@/data/projects"
+import { CONTAINER_VARIANTS } from "@/constants"
+import type { Project } from "@/types"
 
 const Projects = () => {
   const [hoveredProject, setHoveredProject] = useState<number | null>(null)
 
-  const projects = [
-    {
-      id: 1,
-      title: "E-commerce Platform",
-      description:
-        "A full-stack e-commerce platform with user authentication, product management, and payment integration.",
-      image: "/placeholder.svg?height=300&width=400",
-      tags: ["React", "Node.js", "MongoDB", "Stripe"],
-      github: "https://github.com/Chea-Ilong",
-      demo: "https://github.com/Chea-Ilong",
-    },
-    {
-      id: 2,
-      title: "Task Management App",
-      description:
-        "A collaborative task management application with real-time updates and team collaboration features.",
-      image: "/placeholder.svg?height=300&width=400",
-      tags: ["Vue.js", "Firebase", "Tailwind CSS"],
-      github: "https://github.com/Chea-Ilong",
-      demo: "https://github.com/Chea-Ilong",
-    },
-    {
-      id: 3,
-      title: "Weather Dashboard",
-      description: "A weather dashboard that displays current and forecasted weather data for multiple locations.",
-      image: "/placeholder.svg?height=300&width=400",
-      tags: ["JavaScript", "Weather API", "Chart.js"],
-      github: "https://github.com/Chea-Ilong",
-      demo: "https://github.com/Chea-Ilong",
-    },
-    {
-      id: 4,
-      title: "Inventory Management System",
-      description: "A desktop application for managing inventory, sales, and generating reports.",
-      image: "/placeholder.svg?height=300&width=400",
-      tags: ["Java", "JavaFX", "MySQL"],
-      github: "https://github.com/Chea-Ilong",
-      demo: "https://github.com/Chea-Ilong",
-    },
-    {
-      id: 5,
-      title: "Fitness Tracker Mobile App",
-      description: "A mobile application for tracking workouts, nutrition, and health metrics.",
-      image: "/placeholder.svg?height=300&width=400",
-      tags: ["React Native", "Firebase", "Health API"],
-      github: "https://github.com/Chea-Ilong",
-      demo: "https://github.com/Chea-Ilong",
-    },
-    {
-      id: 6,
-      title: "Data Visualization Dashboard",
-      description: "An interactive dashboard for visualizing and analyzing complex datasets.",
-      image: "/placeholder.svg?height=300&width=400",
-      tags: ["D3.js", "React", "Node.js"],
-      github: "https://github.com/Chea-Ilong",
-      demo: "https://github.com/Chea-Ilong",
-    },
-  ]
+  const handleHover = useCallback((id: number) => {
+    setHoveredProject(id)
+  }, [])
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  }
+  const handleLeave = useCallback(() => {
+    setHoveredProject(null)
+  }, [])
 
   return (
     <main className="pt-24 pb-16 bg-white dark:bg-[#1F1D1B] transition-colors duration-500">
@@ -100,23 +42,24 @@ const Projects = () => {
             transition={{ duration: 0.5, delay: 0.3 }}
             className="mt-4 text-gray-600 dark:text-gray-300 max-w-2xl mx-auto"
           >
-            Explore my portfolio of projects spanning web development, mobile applications, and more. Each project
-            represents my passion for creating innovative solutions.
+            Explore my portfolio of projects spanning web development, mobile
+            applications, and more. Each project represents my passion for
+            creating innovative solutions.
           </motion.p>
         </div>
 
         <motion.div
-          variants={containerVariants}
+          variants={CONTAINER_VARIANTS}
           initial="hidden"
           animate="visible"
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
         >
-          {projects.map((project) => (
+          {PROJECTS.map((project: Project) => (
             <ProjectCard
               key={project.id}
               project={project}
-              onHover={() => setHoveredProject(project.id)}
-              onLeave={() => setHoveredProject(null)}
+              onHover={() => handleHover(project.id)}
+              onLeave={handleLeave}
               isHovered={hoveredProject === project.id}
             />
           ))}

@@ -1,117 +1,108 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useTheme } from "next-themes"
 import { motion } from "framer-motion"
 import { Sun, Moon, Menu, X } from "lucide-react"
+import { NAVIGATION_LINKS, KEYBOARD_SHORTCUTS, COLORS } from "@/constants"
+import { throttle } from "@/lib/throttle"
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
-  const [darkMode, setDarkMode] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [activeSection, setActiveSection] = useState("hero")
+  const [mounted, setMounted] = useState(false)
   const pathname = usePathname()
+  const { theme, setTheme } = useTheme()
 
-  // Handle dark mode toggle
+  // Ensure component is mounted before accessing theme
   useEffect(() => {
-    // Check if we're in the browser
-    if (typeof window !== "undefined") {
-      const savedTheme = localStorage.getItem("theme")
-      if (savedTheme) {
-        setDarkMode(savedTheme === "dark")
-      } else {
-        const systemPrefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
-        setDarkMode(systemPrefersDark)
-      }
-    }
-  }, []) // Empty dependency array means this runs once on mount
+    setMounted(true)
+  }, [])
 
-  // Apply theme changes when darkMode state changes
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      if (darkMode) {
-        document.documentElement.classList.add("dark")
-        localStorage.setItem("theme", "dark")
-      } else {
-        document.documentElement.classList.remove("dark")
-        localStorage.setItem("theme", "light")
-      }
-    }
-  }, [darkMode]) // This effect runs only when darkMode changes
-
+  // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       // Close mobile menu on Escape key
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === KEYBOARD_SHORTCUTS.CLOSE_MENU.key && isOpen) {
         setIsOpen(false)
       }
-      
+
       // Toggle dark mode with Ctrl/Cmd + Shift + D
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
+      const { ctrl, shift, key } = KEYBOARD_SHORTCUTS.TOGGLE_DARK_MODE
+      if ((e.ctrlKey || e.metaKey) && shift && e.key === key) {
         e.preventDefault()
-        setDarkMode(!darkMode)
+        setTheme(theme === "dark" ? "light" : "dark")
       }
     }
 
-    document.addEventListener('keydown', handleKeyPress)
-    return () => document.removeEventListener('keydown', handleKeyPress)
-  }, [isOpen, darkMode])
+    document.addEventListener("keydown", handleKeyPress)
+    return () => document.removeEventListener("keydown", handleKeyPress)
+  }, [isOpen, theme, setTheme])
 
-  // Handle scroll effect
+  // Handle scroll effects with throttling and RAF
   useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 10) {
-        setScrolled(true)
-      } else {
-        setScrolled(false)
-      }
-      
-      // Calculate scroll progress
-      const scrollTop = document.documentElement.scrollTop
-      const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight
-      const progress = (scrollTop / scrollHeight) * 100
-      setScrollProgress(progress)
-      
-      // Update active section based on scroll position
-      if (pathname === "/") {
-        const sections = ["hero", "about", "skills", "education", "projects", "contact"]
-        const currentSection = sections.find(section => {
-          const element = document.getElementById(section)
-          if (element) {
-            const rect = element.getBoundingClientRect()
-            return rect.top <= 100 && rect.bottom >= 100
-          }
-          return false
-        })
-        
-        if (currentSection && currentSection !== activeSection) {
-          setActiveSection(currentSection)
-        }
-      }
-    }
+    let rafId: number
 
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
+    const handleScroll = throttle(() => {
+      // Use requestAnimationFrame for smooth updates
+      if (rafId) cancelAnimationFrame(rafId)
+
+      rafId = requestAnimationFrame(() => {
+        const isScrolled = window.scrollY > 10
+        setScrolled(isScrolled)
+
+        // Calculate scroll progress
+        const scrollTop = document.documentElement.scrollTop
+        const scrollHeight =
+          document.documentElement.scrollHeight -
+          document.documentElement.clientHeight
+        const progress = (scrollTop / scrollHeight) * 100
+        setScrollProgress(progress)
+
+        // Update active section based on scroll position (only on home page)
+        if (pathname === "/") {
+          const sections = [
+            "hero",
+            "about",
+            "skills",
+            "education",
+            "projects",
+            "contact",
+          ]
+          const currentSection = sections.find((section) => {
+            const element = document.getElementById(section)
+            if (element) {
+              const rect = element.getBoundingClientRect()
+              return rect.top <= 100 && rect.bottom >= 100
+            }
+            return false
+          })
+
+          if (currentSection && currentSection !== activeSection) {
+            setActiveSection(currentSection)
+          }
+        }
+      })
+    }, 100) // Throttle to 100ms
+
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+      if (rafId) cancelAnimationFrame(rafId)
+    }
+  }, [pathname, activeSection])
+
+  const toggleMenu = useCallback(() => {
+    setIsOpen((prev) => !prev)
   }, [])
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen)
-  }
-
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode)
-  }
-
-  const navLinks = [
-    { name: "Home", path: "/", section: "hero" },
-    { name: "About", path: "/", section: "about" },
-    { name: "Experience", path: "/", section: "education" },
-    { name: "Projects", path: "/", section: "projects" },
-    { name: "Skills", path: "/", section: "skills" },
-    { name: "Contact", path: "/", section: "contact" },
-  ]
+  const toggleTheme = useCallback(() => {
+    setTheme(theme === "dark" ? "light" : "dark")
+  }, [theme, setTheme])
 
   return (
     <header
@@ -153,13 +144,13 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            {navLinks.map((link) => {
+            {NAVIGATION_LINKS.map((link) => {
               const handleClick = (e: React.MouseEvent) => {
                 if (link.section && pathname === "/") {
                   e.preventDefault()
                   const element = document.getElementById(link.section)
                   if (element) {
-                    element.scrollIntoView({ behavior: 'smooth' })
+                    element.scrollIntoView({ behavior: "smooth" })
                   }
                 }
               }
@@ -175,7 +166,8 @@ const Navbar = () => {
                   <Link
                     href={link.path}
                     onClick={handleClick}
-                    className="relative text-base font-medium transition-all duration-300 px-3 py-1 block group text-gray-700 dark:text-gray-300 hover:text-[#EB2420]"
+                    className={`relative text-base font-medium transition-all duration-300 px-3 py-1 block group text-gray-700 dark:text-gray-300 hover:text-[${COLORS.primary}]`}
+                    style={{ "--text-color": COLORS.primary } as any}
                   >
                     <motion.span
                       whileHover={{ scale: 1.05 }}
@@ -184,19 +176,22 @@ const Navbar = () => {
                     >
                       {link.name}
                     </motion.span>
-                    
+
                     {/* Hover underline effect with smooth animation - positioned closer to text */}
                     <motion.div
-                      className="absolute bottom-0 left-3 right-3 h-0.5 bg-[#EB2420] rounded-full"
+                      className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full"
                       initial={{ scaleX: 0 }}
                       whileHover={{ scaleX: 1 }}
-                      transition={{ 
-                        type: "spring", 
-                        stiffness: 400, 
+                      transition={{
+                        type: "spring",
+                        stiffness: 400,
                         damping: 25,
-                        duration: 0.2
+                        duration: 0.2,
                       }}
-                      style={{ transformOrigin: "left" }}
+                      style={{
+                        transformOrigin: "left",
+                        backgroundColor: COLORS.primary,
+                      }}
                     />
                   </Link>
                 </motion.div>
@@ -204,30 +199,44 @@ const Navbar = () => {
             })}
 
             {/* Dark Mode Toggle */}
-            <motion.button
-              onClick={toggleDarkMode}
-              className="p-2 rounded-full bg-gray-100 dark:bg-[#2a2826] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#3a3836] transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#EB2420] focus:ring-offset-2"
-              aria-label="Toggle Dark Mode"
-              whileHover={{ scale: 1.1, rotate: 180 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-            </motion.button>
+            {mounted && (
+              <motion.button
+                onClick={toggleTheme}
+                className="p-2 rounded-full bg-gray-100 dark:bg-[#2a2826] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#3a3836] transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                style={{ "--ring-color": COLORS.primary } as any}
+                aria-label="Toggle Dark Mode"
+                whileHover={{ scale: 1.1, rotate: 180 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
+                {theme === "dark" ? (
+                  <Sun size={20} />
+                ) : (
+                  <Moon size={20} />
+                )}
+              </motion.button>
+            )}
           </nav>
 
           {/* Mobile Menu Button */}
           <div className="flex items-center space-x-2 md:hidden">
-            <motion.button
-              onClick={toggleDarkMode}
-              className="p-3 rounded-full bg-gray-100 dark:bg-[#2a2826] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#3a3836] transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#EB2420] focus:ring-offset-2"
-              aria-label="Toggle Dark Mode"
-              whileHover={{ scale: 1.1, rotate: 180 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-            </motion.button>
+            {mounted && (
+              <motion.button
+                onClick={toggleTheme}
+                className="p-3 rounded-full bg-gray-100 dark:bg-[#2a2826] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#3a3836] transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2"
+                style={{ "--ring-color": COLORS.primary } as any}
+                aria-label="Toggle Dark Mode"
+                whileHover={{ scale: 1.1, rotate: 180 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
+                {theme === "dark" ? (
+                  <Sun size={18} />
+                ) : (
+                  <Moon size={18} />
+                )}
+              </motion.button>
+            )}
 
             <motion.button
               onClick={toggleMenu}
@@ -281,7 +290,7 @@ const Navbar = () => {
             }
           }}
         >
-          {navLinks.map((link) => {
+          {NAVIGATION_LINKS.map((link) => {
             const handleMobileClick = (e: React.MouseEvent) => {
               setIsOpen(false)
               if (link.section && pathname === "/") {
@@ -289,7 +298,7 @@ const Navbar = () => {
                 setTimeout(() => {
                   const element = document.getElementById(link.section)
                   if (element) {
-                    element.scrollIntoView({ behavior: 'smooth' })
+                    element.scrollIntoView({ behavior: "smooth" })
                   }
                 }, 100)
               }
@@ -303,16 +312,16 @@ const Navbar = () => {
                     y: 0,
                     opacity: 1,
                     transition: {
-                      y: { stiffness: 1000, velocity: -100 }
-                    }
+                      y: { stiffness: 1000, velocity: -100 },
+                    },
                   },
                   closed: {
                     y: 50,
                     opacity: 0,
                     transition: {
-                      y: { stiffness: 1000 }
-                    }
-                  }
+                      y: { stiffness: 1000 },
+                    },
+                  },
                 }}
                 whileHover={{ x: 5 }}
                 whileTap={{ scale: 0.98 }}
@@ -321,25 +330,27 @@ const Navbar = () => {
               >
                 <Link
                   href={link.path}
-                  className="block px-4 py-3 rounded-lg text-base font-medium relative transition-all duration-200 group text-gray-700 dark:text-gray-300 hover:text-[#EB2420] hover:bg-gray-100 dark:hover:bg-[#2a2826]"
+                  className={`block px-4 py-3 rounded-lg text-base font-medium relative transition-all duration-200 group text-gray-700 dark:text-gray-300 hover:text-[${COLORS.primary}] hover:bg-gray-100 dark:hover:bg-[#2a2826]`}
                   onClick={handleMobileClick}
+                  style={{ "--hover-color": COLORS.primary } as any}
                 >
-                  <span>
-                    {link.name}
-                  </span>
-                  
+                  <span>{link.name}</span>
+
                   {/* Mobile hover line effect with smooth animation - positioned closer to text */}
                   <motion.div
-                    className="absolute bottom-1 left-4 right-4 h-0.5 bg-[#EB2420] rounded-full"
+                    className="absolute bottom-1 left-4 right-4 h-0.5 rounded-full"
                     initial={{ scaleX: 0 }}
                     whileHover={{ scaleX: 1 }}
-                    transition={{ 
-                      type: "spring", 
-                      stiffness: 400, 
+                    transition={{
+                      type: "spring",
+                      stiffness: 400,
                       damping: 25,
-                      duration: 0.2
+                      duration: 0.2,
                     }}
-                    style={{ transformOrigin: "left" }}
+                    style={{
+                      transformOrigin: "left",
+                      backgroundColor: COLORS.primary,
+                    }}
                   />
                 </Link>
               </motion.div>

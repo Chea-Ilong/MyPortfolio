@@ -1,10 +1,25 @@
 "use client"
 
-import { useState } from "react"
+import { useState, memo, useCallback } from "react"
 import { Award } from "lucide-react"
 import { motion } from "framer-motion"
+import { COLORS } from "@/constants"
 
-const CertificateCard = ({ title, issuer, date, images, credential }) => {
+interface CertificateCardProps {
+  title?: string
+  issuer?: string
+  date?: string
+  images?: string[]
+  credential?: string
+}
+
+const CertificateCard = memo(function CertificateCard({
+  title,
+  issuer,
+  date,
+  images,
+  credential,
+}: CertificateCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   // Animation variants
@@ -50,18 +65,18 @@ const CertificateCard = ({ title, issuer, date, images, credential }) => {
     },
   }
 
-  // Image navigation functions
-  const nextImage = () => {
+  // Image navigation functions with useCallback
+  const nextImage = useCallback(() => {
     if (images && images.length > 0) {
       setCurrentImageIndex((prev) => (prev + 1) % images.length)
     }
-  }
+  }, [images])
 
-  const prevImage = () => {
+  const prevImage = useCallback(() => {
     if (images && images.length > 0) {
       setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
     }
-  }
+  }, [images])
 
   // Ensure we have valid images array and current index
   const imageArray = Array.isArray(images) ? images : []
@@ -70,7 +85,8 @@ const CertificateCard = ({ title, issuer, date, images, credential }) => {
 
   return (
     <motion.div
-      className="relative bg-white dark:bg-[#2a2826] rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-[#EB2420]/20 transition-all min-h-[280px] md:min-h-[300px]"
+      className="relative bg-white dark:bg-[#2a2826] rounded-xl overflow-hidden shadow-lg border border-gray-200 transition-all min-h-[280px] md:min-h-[300px]"
+      style={{ borderColor: "rgb(235, 36, 32, 0.2)" }}
       initial="hidden"
       whileInView="visible"
       whileHover="hover"
@@ -157,6 +173,8 @@ const CertificateCard = ({ title, issuer, date, images, credential }) => {
       </div>
     </motion.div>
   )
-}
+})
+
+CertificateCard.displayName = "CertificateCard"
 
 export default CertificateCard

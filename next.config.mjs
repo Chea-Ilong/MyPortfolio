@@ -1,14 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  // TypeScript and ESLint are now checked during builds for better code quality
+  // This ensures type safety and code consistency across the project
   images: {
-    domains: ['localhost'],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'https',
+        hostname: 'localhost',
+      },
+    ],
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 60,
   },
@@ -23,6 +28,10 @@ const nextConfig = {
   compress: true,
   // Enable swc minify for better performance
   swcMinify: true,
+  // Optimize for production
+  productionBrowserSourceMaps: false,
+  // Enable React strict mode for better performance
+  reactStrictMode: true,
   // Add performance headers
   async headers() {
     return [

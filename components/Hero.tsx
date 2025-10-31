@@ -1,12 +1,29 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
+import Image from "next/image"
 import { motion } from "framer-motion"
-import { FaGithub, FaLinkedin, FaFacebook } from "react-icons/fa"
 import Link from "next/link"
+import { SocialLinks } from "./ui/SocialLinks"
+import { COLORS } from "@/constants"
 
 const Hero = () => {
   const [activeIcon, setActiveIcon] = useState<string | null>(null)
+
+  const handleProjectsClick = useCallback(() => {
+    const projectsSection = document.getElementById("projects")
+    if (projectsSection) {
+      projectsSection.scrollIntoView({ behavior: "smooth" })
+    }
+  }, [])
+
+  const handleContactClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    const element = document.getElementById("contact")
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" })
+    }
+  }, [])
 
   return (
     <section id="hero" className="relative min-h-screen flex items-center bg-white dark:bg-[#1F1D1B] transition-colors duration-500">
@@ -14,13 +31,8 @@ const Hero = () => {
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-white dark:bg-[#1F1D1B]" />
         <div className="absolute inset-0">
-          {/* Animated gradient blobs */}
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#EB2420]/10 dark:bg-[#EB2420]/20 rounded-full filter blur-[120px] animate-blob" />
-          <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-purple-700/5 dark:bg-purple-700/10 rounded-full filter blur-[120px] animate-blob animation-delay-2000" />
-          <div className="absolute bottom-1/4 right-1/3 w-96 h-96 bg-yellow-700/5 dark:bg-yellow-700/10 rounded-full filter blur-[120px] animate-blob animation-delay-4000" />
-
-          {/* Grid pattern overlay */}
-          <div className="absolute inset-0 bg-grid-pattern opacity-[0.02] dark:opacity-[0.03]" />
+          {/* Subtle gradient accent */}
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#EB2420]/5 dark:bg-[#EB2420]/10 rounded-full filter blur-[120px]" />
         </div>
       </div>
 
@@ -33,16 +45,6 @@ const Hero = () => {
             transition={{ duration: 0.6 }}
           >
             <div className="space-y-6">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="inline-flex items-center px-3 py-1 rounded-full bg-[#EB2420]/10 border border-[#EB2420]/20"
-              >
-                <span className="w-2 h-2 rounded-full bg-[#EB2420] mr-2 animate-pulse"></span>
-                <span className="text-sm font-medium text-[#EB2420]">Available for freelance work</span>
-              </motion.div>
-
               <div className="space-y-2">
                 <h2 className="text-xl font-medium text-[#EB2420]">Hello, I'm</h2>
                 <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -54,106 +56,59 @@ const Hero = () => {
               </div>
 
               <p className="text-gray-600 dark:text-gray-400 text-lg max-w-md leading-relaxed">
-                Passionate about building innovative solutions and learning new technologies. Currently focusing on web
-                development and software architecture.
+                Building web applications with React and Next.js. Currently studying Software Engineering and working on
+                personal projects to improve my skills.
               </p>
 
               <div className="flex flex-wrap gap-4">
                 <motion.button
-                  onClick={() => {
-                    const projectsSection = document.getElementById('projects');
-                    if (projectsSection) {
-                      projectsSection.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  }}
+                  onClick={handleProjectsClick}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-8 py-3 bg-gradient-to-r from-[#EB2420] to-[#EB2420]/80 text-white font-medium rounded-lg hover:shadow-lg hover:shadow-[#EB2420]/20 transition-all"
+                  className="px-8 py-3 text-white font-medium rounded-lg hover:shadow-lg transition-all"
+                  style={{
+                    backgroundImage: `linear-gradient(to right, ${COLORS.primary}, rgba(235, 36, 32, 0.8))`,
+                    boxShadow: `hover:0 10px 25px -5px rgba(235, 36, 32, 0.2)`,
+                  }}
                 >
                   View Projects
                 </motion.button>
-                <Link href="#contact">
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-8 py-3 border border-[#EB2420]/30 text-gray-900 dark:text-white font-medium rounded-lg hover:bg-[#EB2420]/10 transition-all cursor-pointer"
-                    onClick={(e) => {
-                      e.preventDefault()
-                      const element = document.getElementById('contact')
-                      if (element) {
-                        element.scrollIntoView({ behavior: 'smooth' })
-                      }
-                    }}
-                  >
-                    Contact Me
-                  </motion.div>
-                </Link>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-8 py-3 border text-gray-900 dark:text-white font-medium rounded-lg hover:bg-opacity-10 transition-all cursor-pointer"
+                  style={{
+                    borderColor: `${COLORS.primary}33`,
+                  }}
+                  onClick={handleContactClick}
+                >
+                  Contact Me
+                </motion.div>
               </div>
 
               <div className="pt-6">
                 <p className="text-gray-500 dark:text-gray-500 mb-3 text-sm">Find me on</p>
-                <div className="flex space-x-4">
-                  {[
-                    { id: "github", icon: <FaGithub className="h-6 w-6" />, href: "https://github.com/Chea-Ilong" },
-                    { id: "linkedin", icon: <FaLinkedin className="h-6 w-6" />, href: "https://www.linkedin.com/in/chea-ilong-88bb83333/" },
-                    { id: "facebook", icon: <FaFacebook className="h-6 w-6" />, href: "https://www.facebook.com/chea.elong.9" },
-                  ].map((social) => (
-                    <motion.a
-                      key={social.id}
-                      href={social.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`text-gray-500 dark:text-gray-400 hover:text-[#EB2420] transition-colors ${activeIcon === social.id ? "text-[#EB2420]" : ""}`}
-                      whileHover={{ scale: 1.2, color: "#EB2420" }}
-                      whileTap={{ scale: 0.9, color: "#EB2420" }}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.001 * social.id.length }}
-                      onMouseEnter={() => setActiveIcon(social.id)}
-                      onMouseLeave={() => setActiveIcon(null)}
-                    >
-                      {social.icon}
-                    </motion.a>
-                  ))}
-                </div>
+                <SocialLinks layout="horizontal" size="md" withAnimation />
               </div>
             </div>
           </motion.div>
 
           <motion.div
             className="lg:w-1/2 flex justify-center"
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <div className="relative">
-              {/* Decorative elements */}
-              <div className="absolute -top-6 -left-6 w-24 h-24 border-t-2 border-l-2 border-[#EB2420]/30 rounded-tl-xl" />
-              <div className="absolute -bottom-6 -right-6 w-24 h-24 border-b-2 border-r-2 border-[#EB2420]/30 rounded-br-xl" />
-
-              {/* Profile image with gradient border */}
-              <div className="relative w-72 h-72 md:w-80 md:h-80 lg:w-96 lg:h-96 rounded-2xl bg-gradient-to-br from-[#EB2420] via-[#EB2420]/50 to-purple-600/30 p-1 shadow-2xl">
-                <div className="w-full h-full rounded-2xl overflow-hidden bg-gray-100 dark:bg-[#2a2826]">
-                  {/* Replace with actual image */}
-                  <img
-                    src="/porfile.jpg"
-                    alt="Chea Ilong"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* Floating badge */}
-                <div className="absolute -bottom-5 -right-5 bg-white dark:bg-[#2a2826] px-6 py-3 rounded-lg shadow-xl border border-[#EB2420]/20">
-                  <span className="text-[#EB2420] font-medium">Developer</span>
-                </div>
-
-                {/* Experience badge */}
-                <div className="absolute -top-5 -left-5 bg-white dark:bg-[#2a2826] p-3 rounded-lg shadow-xl border border-[#EB2420]/20">
-                  <div className="text-center">
-                    <span className="text-2xl font-bold text-gray-900 dark:text-white">2+</span>
-                    <span className="block text-xs text-gray-500 dark:text-gray-400">Years Experience</span>
-                  </div>
-                </div>
+            <div className="relative w-72 h-72 md:w-80 md:h-80 lg:w-96 lg:h-96 rounded-2xl overflow-hidden shadow-xl">
+              <div className="w-full h-full bg-gray-100 dark:bg-[#2a2826]">
+                <Image
+                  src="/porfile.jpg"
+                  alt="Chea Ilong"
+                  width={384}
+                  height={384}
+                  priority
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
           </motion.div>

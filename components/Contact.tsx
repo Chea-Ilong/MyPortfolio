@@ -12,6 +12,9 @@ const Contact = () => {
     message: "",
   })
   const [focusedField, setFocusedField] = useState<string | null>(null)
+  const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value } = e.target
@@ -19,18 +22,74 @@ const Contact = () => {
       ...prev,
       [id]: value,
     }))
+    // Clear error for this field when user starts typing
+    if (errors[id as keyof typeof errors]) {
+      setErrors((prev) => ({
+        ...prev,
+        [id]: undefined,
+      }))
+    }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateForm = () => {
+    const newErrors: { name?: string; email?: string; message?: string } = {}
+
+    if (!formState.name.trim()) {
+      newErrors.name = "Name is required"
+    } else if (formState.name.trim().length < 2) {
+      newErrors.name = "Name must be at least 2 characters"
+    }
+
+    if (!formState.email.trim()) {
+      newErrors.email = "Email is required"
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formState.email)) {
+      newErrors.email = "Please enter a valid email address"
+    }
+
+    if (!formState.message.trim()) {
+      newErrors.message = "Message is required"
+    } else if (formState.message.trim().length < 10) {
+      newErrors.message = "Message must be at least 10 characters"
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle form submission logic here
-    console.log("Form submitted:", formState)
-    // Reset form
-    setFormState({
-      name: "",
-      email: "",
-      message: "",
-    })
+
+    if (!validateForm()) {
+      return
+    }
+
+    setIsSubmitting(true)
+    setSubmitStatus("idle")
+
+    try {
+      // Simulate API call - replace with your actual endpoint
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
+      // For now, just log to console and show success
+      console.log("Form submitted:", formState)
+
+      setSubmitStatus("success")
+
+      // Reset form after successful submission
+      setTimeout(() => {
+        setFormState({
+          name: "",
+          email: "",
+          message: "",
+        })
+        setSubmitStatus("idle")
+      }, 3000)
+    } catch (error) {
+      console.error("Submission error:", error)
+      setSubmitStatus("error")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const containerVariants = {
@@ -175,12 +234,7 @@ const Contact = () => {
             <h3 className="text-2xl font-bold mb-6 text-[#EB2420]">Send Me a Message</h3>
 
             <form className="space-y-4" onSubmit={handleSubmit}>
-              <motion.div
-                whileHover={{ y: -2 }}
-                animate={{
-                  borderColor: focusedField === "name" ? "#EB2420" : "rgba(235, 36, 32, 0.2)",
-                }}
-              >
+              <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Your Name
                 </label>
@@ -191,17 +245,15 @@ const Contact = () => {
                   onChange={handleInputChange}
                   onFocus={() => setFocusedField("name")}
                   onBlur={() => setFocusedField(null)}
-                  className="w-full px-4 py-2 bg-white dark:bg-[#2a2826] border border-gray-300 dark:border-[#EB2420]/20 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EB2420] focus:border-[#EB2420] text-gray-900 dark:text-white transition-all duration-300"
+                  className={`w-full px-4 py-2 bg-white dark:bg-[#2a2826] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#EB2420] focus:border-[#EB2420] text-gray-900 dark:text-white transition-all duration-300 ${
+                    errors.name ? "border-red-500" : "border-gray-300 dark:border-[#EB2420]/20"
+                  }`}
                   placeholder="John Doe"
                 />
-              </motion.div>
+                {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
+              </div>
 
-              <motion.div
-                whileHover={{ y: -2 }}
-                animate={{
-                  borderColor: focusedField === "email" ? "#EB2420" : "rgba(235, 36, 32, 0.2)",
-                }}
-              >
+              <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Your Email
                 </label>
@@ -212,17 +264,15 @@ const Contact = () => {
                   onChange={handleInputChange}
                   onFocus={() => setFocusedField("email")}
                   onBlur={() => setFocusedField(null)}
-                  className="w-full px-4 py-2 bg-white dark:bg-[#2a2826] border border-gray-300 dark:border-[#EB2420]/20 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EB2420] focus:border-[#EB2420] text-gray-900 dark:text-white transition-all duration-300"
+                  className={`w-full px-4 py-2 bg-white dark:bg-[#2a2826] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#EB2420] focus:border-[#EB2420] text-gray-900 dark:text-white transition-all duration-300 ${
+                    errors.email ? "border-red-500" : "border-gray-300 dark:border-[#EB2420]/20"
+                  }`}
                   placeholder="john@example.com"
                 />
-              </motion.div>
+                {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+              </div>
 
-              <motion.div
-                whileHover={{ y: -2 }}
-                animate={{
-                  borderColor: focusedField === "message" ? "#EB2420" : "rgba(235, 36, 32, 0.2)",
-                }}
-              >
+              <div>
                 <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Message
                 </label>
@@ -233,19 +283,37 @@ const Contact = () => {
                   onChange={handleInputChange}
                   onFocus={() => setFocusedField("message")}
                   onBlur={() => setFocusedField(null)}
-                  className="w-full px-4 py-2 bg-white dark:bg-[#2a2826] border border-gray-300 dark:border-[#EB2420]/20 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EB2420] focus:border-[#EB2420] text-gray-900 dark:text-white transition-all duration-300"
+                  className={`w-full px-4 py-2 bg-white dark:bg-[#2a2826] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#EB2420] focus:border-[#EB2420] text-gray-900 dark:text-white transition-all duration-300 ${
+                    errors.message ? "border-red-500" : "border-gray-300 dark:border-[#EB2420]/20"
+                  }`}
                   placeholder="Your message here..."
                 ></textarea>
-              </motion.div>
+                {errors.message && <p className="mt-1 text-sm text-red-500">{errors.message}</p>}
+              </div>
 
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              {submitStatus === "success" && (
+                <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
+                  <p className="text-sm text-green-700 dark:text-green-400">Message sent successfully! I'll get back to you soon.</p>
+                </div>
+              )}
+
+              {submitStatus === "error" && (
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+                  <p className="text-sm text-red-700 dark:text-red-400">Failed to send message. Please try again later.</p>
+                </div>
+              )}
+
+              <button
                 type="submit"
-                className="w-full bg-[#EB2420] text-white py-2 px-4 rounded-md hover:bg-[#EB2420]/90 transition-colors duration-300 font-medium"
+                disabled={isSubmitting}
+                className={`w-full py-2 px-4 rounded-md font-medium transition-colors duration-300 ${
+                  isSubmitting
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-[#EB2420] hover:bg-[#EB2420]/90 text-white"
+                }`}
               >
-                Send Message
-              </motion.button>
+                {isSubmitting ? "Sending..." : "Send Message"}
+              </button>
             </form>
           </motion.div>
         </motion.div>

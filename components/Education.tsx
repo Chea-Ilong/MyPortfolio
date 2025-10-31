@@ -2,9 +2,13 @@
 
 import { useState, useRef } from "react"
 import { motion, useScroll, useTransform, useSpring, useInView } from "framer-motion"
-import { FaGraduationCap, FaAward } from "react-icons/fa"
+import { FaAward } from "react-icons/fa"
+import { SectionHeader } from "./ui/SectionHeader"
 import CertificateCard from "./CertificateCard"
+import { ACHIEVEMENTS } from "@/data/education"
+import type { Achievement, EducationEvent } from "@/types"
 
+// Legacy: educationEvents moved to data/education.ts
 const educationEvents = [
   {
     year: 2020,
@@ -80,7 +84,7 @@ const achievementEvents = [
   },
 ]
 
-const TimelineIcon = ({ progress }) => (
+const TimelineIcon = ({ progress }: { progress: number }) => (
   <svg
     viewBox="0 0 24 24"
     fill="none"
@@ -125,27 +129,14 @@ const Education = () => {
       ref={containerRef}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Experience</h2>
-          <motion.div
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            viewport={{ once: true }}
-            className="h-1 w-20 bg-[#EB2420] mx-auto mt-4 mb-8"
-          />
-
-        </motion.div>
+        <SectionHeader
+          title="Experience"
+          centered
+        />
 
         {/* Experience/Achievements Content */}
         <div className="grid grid-cols-1 gap-6 md:gap-8 max-w-4xl mx-auto">
-          {achievementEvents.map((event, index) =>
+          {ACHIEVEMENTS.map((event, index) =>
             event.isCertificate ? (
               <CertificateCard
                 key={`achievement-${index}`}
@@ -165,26 +156,23 @@ const Education = () => {
   )
 }
 
-function AchievementCard({ event }) {
+function AchievementCard({ event }: { event: Achievement }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       viewport={{ once: true }}
-      whileHover={{ y: -5 }}
-      className="bg-white dark:bg-[#2a2826] rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-[#EB2420]/20 hover:border-[#EB2420]/50 transition-all"
+      className="bg-white dark:bg-[#2a2826] rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-[#EB2420]/20"
     >
       <div className="flex flex-col md:flex-row">
         {/* Left side - Image */}
         <div className="md:w-1/3 relative">
           <div className="aspect-video md:aspect-square w-full overflow-hidden">
-            <motion.img
-              src={event.image || "/porfile.jpg"}
+            <img
+              src={event.images?.[0] || "/porfile.jpg"}
               alt={event.title}
               className="w-full h-full object-cover"
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.3 }}
             />
             {/* Overlay with award icon */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#EB2420]/20 to-transparent flex items-end justify-end p-4">
@@ -211,7 +199,14 @@ function AchievementCard({ event }) {
   )
 }
 
-function TimelineEvent({ event, index, isExpanded, onToggle }) {
+interface TimelineEventProps {
+  event: EducationEvent | Achievement
+  index: number
+  isExpanded: boolean
+  onToggle: () => void
+}
+
+function TimelineEvent({ event, index, isExpanded, onToggle }: TimelineEventProps) {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, amount: 0.5 })
 

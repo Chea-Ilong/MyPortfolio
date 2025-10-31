@@ -8,22 +8,22 @@ const About = () => {
     {
       name: "Frontend Development",
       icon: <FaCode className="w-8 h-8" />,
-      description: "Building responsive and interactive user interfaces with modern frameworks.",
+      description: "React, Next.js, TypeScript, and Tailwind CSS for building modern web interfaces.",
     },
     {
       name: "Backend Development",
       icon: <FaServer className="w-8 h-8" />,
-      description: "Creating robust server-side applications and APIs.",
+      description: "Node.js with Express, RESTful APIs, and working with PostgreSQL databases.",
     },
     {
       name: "Full Stack Development",
       icon: <FaLaptopCode className="w-8 h-8" />,
-      description: "End-to-end application development from database to user interface.",
+      description: "Connecting frontend and backend, deployment on Vercel, and managing the full development cycle.",
     },
     {
-      name: "Mobile Development",
+      name: "Tools & Workflow",
       icon: <FaMobileAlt className="w-8 h-8" />,
-      description: "Developing cross-platform mobile applications.",
+      description: "Git for version control, VS Code as my editor, and comfortable with Linux development environment.",
     },
   ]
 
@@ -93,20 +93,19 @@ const About = () => {
             className="lg:w-3/5"
           >
             <div className="space-y-6">
-              <h3 className="text-3xl font-bold text-[#EB2420]">Who I Am</h3>
+              <h3 className="text-3xl font-bold text-[#EB2420]">About Me</h3>
               <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed">
-                I'm Chea Ilong, a passionate software engineering student with a focus on creating innovative and
-                user-friendly applications. My journey in technology began with a curiosity about how digital solutions
-                can solve real-world problems.
+                I'm a software engineering student from Phnom Penh, Cambodia. I started programming in 2020 and have
+                been building web applications ever since.
               </p>
               <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed">
-                Currently pursuing my degree in Software Engineering, I combine academic knowledge with practical
-                experience through personal projects and collaborative work. I believe in continuous learning and
-                staying updated with the latest technologies and industry trends.
+                My main focus is on full-stack web development. I work with React, Next.js, and TypeScript for building
+                user interfaces, and I'm comfortable with Node.js and databases on the backend. I enjoy the challenge of
+                turning ideas into working software.
               </p>
               <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed">
-                When I'm not coding, you can find me exploring new technologies, contributing to open-source projects,
-                or engaging in tech communities to share knowledge and experiences.
+                Outside of coursework, I spend time learning new tools and frameworks, building side projects, and
+                occasionally contributing to open-source when I find something interesting.
               </p>
 
               <div className="pt-4">
@@ -165,17 +164,9 @@ const About = () => {
                 whileHover={{ y: -5, transition: { duration: 0.2 } }}
               >
                 <div className="flex items-center mb-4">
-                  <motion.div
-                    className="text-[#EB2420] mr-4"
-                    whileHover={{ scale: 1.2, rotate: 5 }}
-                    whileTap={{ scale: 0.9, rotate: -5 }}
-                    animate={{
-                      scale: [1, 1.05, 1],
-                      transition: { duration: 2, repeat: Number.POSITIVE_INFINITY, repeatType: "reverse" },
-                    }}
-                  >
+                  <div className="text-[#EB2420] mr-4">
                     {skill.icon}
-                  </motion.div>
+                  </div>
                   <h4 className="text-xl font-semibold text-gray-900 dark:text-white">{skill.name}</h4>
                 </div>
                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed">{skill.description}</p>

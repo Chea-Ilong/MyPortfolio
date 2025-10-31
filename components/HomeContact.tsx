@@ -7,6 +7,84 @@ import Link from "next/link"
 
 const HomeContact = () => {
   const [activeIcon, setActiveIcon] = useState<string | null>(null)
+  const [formState, setFormState] = useState({
+    name: "",
+    email: "",
+    message: "",
+  })
+  const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target
+    setFormState((prev) => ({
+      ...prev,
+      [id]: value,
+    }))
+    if (errors[id as keyof typeof errors]) {
+      setErrors((prev) => ({
+        ...prev,
+        [id]: undefined,
+      }))
+    }
+  }
+
+  const validateForm = () => {
+    const newErrors: { name?: string; email?: string; message?: string } = {}
+
+    if (!formState.name.trim()) {
+      newErrors.name = "Name is required"
+    } else if (formState.name.trim().length < 2) {
+      newErrors.name = "Name must be at least 2 characters"
+    }
+
+    if (!formState.email.trim()) {
+      newErrors.email = "Email is required"
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formState.email)) {
+      newErrors.email = "Please enter a valid email address"
+    }
+
+    if (!formState.message.trim()) {
+      newErrors.message = "Message is required"
+    } else if (formState.message.trim().length < 10) {
+      newErrors.message = "Message must be at least 10 characters"
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!validateForm()) {
+      return
+    }
+
+    setIsSubmitting(true)
+    setSubmitStatus("idle")
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+      console.log("Form submitted:", formState)
+      setSubmitStatus("success")
+
+      setTimeout(() => {
+        setFormState({
+          name: "",
+          email: "",
+          message: "",
+        })
+        setSubmitStatus("idle")
+      }, 3000)
+    } catch (error) {
+      console.error("Submission error:", error)
+      setSubmitStatus("error")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   const contactInfo = [
     {
@@ -149,51 +227,81 @@ const HomeContact = () => {
           >
             <h3 className="text-2xl font-bold mb-6 text-[#EB2420]">Send Me a Message</h3>
 
-            <form className="space-y-4">
-              <motion.div whileHover={{ y: -2 }}>
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Your Name
                 </label>
                 <input
                   type="text"
                   id="name"
-                  className="w-full px-4 py-2 bg-white dark:bg-[#1F1D1B] border border-gray-300 dark:border-[#EB2420]/20 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EB2420] focus:border-[#EB2420] text-gray-900 dark:text-white transition-all duration-300"
+                  value={formState.name}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-2 bg-white dark:bg-[#1F1D1B] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#EB2420] focus:border-[#EB2420] text-gray-900 dark:text-white transition-all duration-300 ${
+                    errors.name ? "border-red-500" : "border-gray-300 dark:border-[#EB2420]/20"
+                  }`}
                   placeholder="John Doe"
                 />
-              </motion.div>
+                {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
+              </div>
 
-              <motion.div whileHover={{ y: -2 }}>
+              <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Your Email
                 </label>
                 <input
                   type="email"
                   id="email"
-                  className="w-full px-4 py-2 bg-white dark:bg-[#1F1D1B] border border-gray-300 dark:border-[#EB2420]/20 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EB2420] focus:border-[#EB2420] text-gray-900 dark:text-white transition-all duration-300"
+                  value={formState.email}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-2 bg-white dark:bg-[#1F1D1B] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#EB2420] focus:border-[#EB2420] text-gray-900 dark:text-white transition-all duration-300 ${
+                    errors.email ? "border-red-500" : "border-gray-300 dark:border-[#EB2420]/20"
+                  }`}
                   placeholder="john@example.com"
                 />
-              </motion.div>
+                {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+              </div>
 
-              <motion.div whileHover={{ y: -2 }}>
+              <div>
                 <label htmlFor="message" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Message
                 </label>
                 <textarea
                   id="message"
                   rows={4}
-                  className="w-full px-4 py-2 bg-white dark:bg-[#1F1D1B] border border-gray-300 dark:border-[#EB2420]/20 rounded-md focus:outline-none focus:ring-2 focus:ring-[#EB2420] focus:border-[#EB2420] text-gray-900 dark:text-white transition-all duration-300"
+                  value={formState.message}
+                  onChange={handleInputChange}
+                  className={`w-full px-4 py-2 bg-white dark:bg-[#1F1D1B] border rounded-md focus:outline-none focus:ring-2 focus:ring-[#EB2420] focus:border-[#EB2420] text-gray-900 dark:text-white transition-all duration-300 ${
+                    errors.message ? "border-red-500" : "border-gray-300 dark:border-[#EB2420]/20"
+                  }`}
                   placeholder="Your message here..."
                 ></textarea>
-              </motion.div>
+                {errors.message && <p className="mt-1 text-sm text-red-500">{errors.message}</p>}
+              </div>
 
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+              {submitStatus === "success" && (
+                <div className="p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md">
+                  <p className="text-sm text-green-700 dark:text-green-400">Message sent successfully! I'll get back to you soon.</p>
+                </div>
+              )}
+
+              {submitStatus === "error" && (
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+                  <p className="text-sm text-red-700 dark:text-red-400">Failed to send message. Please try again later.</p>
+                </div>
+              )}
+
+              <button
                 type="submit"
-                className="w-full bg-[#EB2420] text-white py-3 px-4 rounded-md hover:bg-[#EB2420]/90 transition-colors duration-300 font-medium"
+                disabled={isSubmitting}
+                className={`w-full py-3 px-4 rounded-md font-medium transition-colors duration-300 ${
+                  isSubmitting
+                    ? "bg-gray-400 cursor-not-allowed text-white"
+                    : "bg-[#EB2420] hover:bg-[#EB2420]/90 text-white"
+                }`}
               >
-                Send Message
-              </motion.button>
+                {isSubmitting ? "Sending..." : "Send Message"}
+              </button>
             </form>
           </motion.div>
         </motion.div>
